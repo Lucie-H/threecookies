@@ -1,0 +1,23 @@
+{
+  "name": "three-cookies",
+  "version": "1.0.0",
+  "description": "coookiiiiiies",
+  "main": "index.js",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lucie-H/threecookies.git"
+  },
+  "author": "Yulia & Lucie",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Lucie-H/threecookies/issues"
+  },
+  "homepage": "https://github.com/Lucie-H/threecookies#readme",
+  "dependencies": {
+    "http-server": "^0.9.0",
+    "three": "^0.78.0"
+  }
+}
