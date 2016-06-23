@@ -27,7 +27,7 @@ const init = () => {
 
 const load = () => {
   const loader = new THREE.STLLoader();
-  loader.load('../stl/airship.stl', (geometry) => {
+  loader.load('../stl/ruby.stl', (geometry) => {
     material = new THREE.MeshPhongMaterial({ color: 0xffffff, specular: 0xffff00, shininess: 200 });
     mesh = new THREE.Mesh( geometry, material );
     mesh.scale.set(3,3,3);
