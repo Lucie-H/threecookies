@@ -1,5 +1,12 @@
-let scene, camera, renderer;
-let geometry, material, mesh;
+let scene;
+let camera;
+let controls;
+let renderer;
+let geometry;
+let material;
+let mesh;
+let light;
+let rotationSpeed = 0.03;
 
 const init = () => {
   scene = new THREE.Scene();
@@ -7,7 +14,7 @@ const init = () => {
   camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
   camera.position.z = 1000;
 
-  var light = new THREE.DirectionalLight( 0xffffff, 0.8 );
+  light = new THREE.DirectionalLight( 0xffffff, 0.8 );
   light.position.set(5, 100, 1000);
   light.angle = (Math.PI / 3);
   light.castShadow = true;
@@ -22,7 +29,10 @@ const init = () => {
   renderer.shadowMap.enabled = true;
   renderer.setClearColor( 0xefefef );
 
+  controls = new THREE.OrbitControls( camera, renderer.domElement );
   document.body.appendChild( renderer.domElement );
+  renderer.domElement.addEventListener('mousedown', stopRotation);
+  renderer.domElement.addEventListener('mouseup', startRotation);
 }
 
 const load = () => {
@@ -38,9 +48,20 @@ const load = () => {
   });
 }
 
+const stopRotation = () => {
+  rotationSpeed = 0;
+}
+
+const startRotation = () => {
+  setTimeout(() => {
+    rotationSpeed = 0.03;
+  }, 300);
+}
+
 const render = () => {
   requestAnimationFrame( render );
-  mesh.rotation.y += -0.03;
+  if (mesh) mesh.rotation.y -= rotationSpeed;
+
   renderer.render( scene, camera );
 }
 
