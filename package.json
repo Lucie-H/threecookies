@@ -17,13 +17,20 @@
   },
   "homepage": "https://github.com/Lucie-H/threecookies#readme",
   "dependencies": {
+    "react": "^15.1.0",
+    "react-dom": "^15.1.0",
     "three": "^0.78.0"
   },
   "devDependencies": {
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-react": "^6.5.0",
+    "babelify": "^7.3.0",
     "browser-sync": "^2.13.0",
+    "browserify": "^13.0.1",
     "gulp": "^3.9.1",
     "gulp-load-plugins": "^1.2.4",
     "gulp-sass": "^2.3.2",
-    "path": "^0.12.7"
+    "gulp-util": "^3.0.7",
+    "vinyl-source-stream": "^1.1.0"
   }
 }
