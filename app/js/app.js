@@ -43,6 +43,8 @@ const init = () => {
   document.body.appendChild( renderer.domElement );
   renderer.domElement.addEventListener('mousedown', stopRotation);
   renderer.domElement.addEventListener('mouseup', startRotation);
+
+  window.addEventListener('resize', resize);
 }
 
 const load = () => {
@@ -56,6 +58,12 @@ const load = () => {
     // mesh.rotation.set(0, - Math.PI / 2, 0);
     scene.add( mesh );
   });
+}
+
+const resize = () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
 }
 
 const stopRotation = () => {
