@@ -2,3 +2,29 @@
   width: percentage(5/7);
   transform: scaleX(2);
 }
+
+.jsButton {
+  background-color: #efefef;
+  color: #999999;
+  text-align: center;
+  right: 0%;
+  padding: 15px 32px;
+  position: absolute;
+  font-size: 16px;
+  border: none;
+  outline-style: none;
+
+}
+
+.rubyButton {
+  background-color: #efefef;
+  color: #999999;
+  text-align: center;
+  padding: 15px 32px;
+  position: absolute;
+  right: 0%;
+  font-size: 16px;
+  border: none;
+  margin-top: 55px;
+  outline-style: none;
+}

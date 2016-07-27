@@ -3,13 +3,38 @@
   <head>
     <title>Three 3D Cookies</title>
     <meta charset="utf-8">
+    <link type="text/css" rel="stylesheet" href="../css/styles.css"/>
+
   </head>
   <body>
-    <!-- build:js js/main.min.js -->
+    <!-- build:js js/vendor.js -->
       <script src="../node_modules/three/build/three.min.js"></script>
+
+      <script src="../node_modules/three/examples/js/Octree.js"></script>
+      <script src="../node_modules/three/examples/js/controls/TrackballControls.js"></script>
+
+
       <script src="../node_modules/three/examples/js/loaders/STLLoader.js"></script>
       <script src="../node_modules/three/examples/js/controls/OrbitControls.js"></script>
-      <script src="js/app.js"></script>
+      <!--<script src="js/app.js"></script>-->
     <!-- endbuild -->
+  <!-- build:js js/main.js -->
+      <script src="js/main.js"></script>
+
+
+    <!-- endbuild -->
+
+    <div id="addButton">
+    <!--  <script type="text/javascript">
+        wrapper();
+      </script>
+    -->
+      <div id="root"></div>
+
+
+    </div>
+
+
+
   </body>
 </html>

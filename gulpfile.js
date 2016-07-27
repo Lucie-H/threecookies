@@ -19,27 +19,54 @@ const dependencies = [
   'react-dom'
 ];
 
-gulp.task('javascript', () => {
-  return gulp.src('app/js/**/*.js')
-    .pipe(through2.obj((file, enc, next) => { // workaround for https://github.com/babel/babelify/issues/46
+gulp.task('javascript', function () {
+  return gulp.src('app/js/main.js')
+    .pipe(through2.obj(function (file, enc, next) { // workaround for https://github.com/babel/babelify/issues/46
       browserify({
         entries: file.path,
         extensions: ['.js', '.jsx'],
         debug: true,
-        transform: [
-          babelify
-        ]
-      }).bundle((err, res) => {
+        transform: babelify
+      }).bundle(function(err, res) {
         if (err) return next(err);
         file.contents = res;
+        console.log('test2')
         next(null, file);
       });
     }))
-    .on('error', gutil.log)
+    .on('error', function (error) {
+      console.log(error.stack);
+      this.emit('end');
+    })
+    .on('data', function(data) {
+      console.log('test')
+      console.log(data.contents.toString())
+    })
     .pipe(gulp.dest('dist/js/'))
 });
-
-gulp.task('stylesheets', () => {
+/*
+gulp.task('javascript', function () {
+  return gulp.src('app/js/main.js')
+    .pipe(through2.obj(function(file, enc, next) { // workaround for https://github.com/babel/babelify/issues/46
+      const that = this;
+      browserify({
+        entries: file.path,
+        extensions: ['.js', '.jsx'],
+        debug: true,
+        transform:
+          babelify
+      }).bundle(function(err, res) {
+        if (err) return next(err);
+        file.contents = res;
+        that.push(file)
+        next(null, file)
+      });
+    }))
+    //.on('error', gutil.log)
+    .pipe(gulp.dest('dist/js/'))
+});
+*/
+gulp.task('stylesheets', function ()  {
   return gulp.src('app/stylesheets/**/*.scss')
     .pipe($.sass())
     .pipe($.postcss([
@@ -48,18 +75,18 @@ gulp.task('stylesheets', () => {
     .pipe(gulp.dest('dist/css/'))
 });
 
-gulp.task('stl', () => {
+gulp.task('stl', function () {
   return gulp.src('app/stl/*.stl')
     .pipe(gulp.dest('dist/stl'))
 });
 
-gulp.task('html', ['javascript', 'stylesheets', 'stl'], () => {
+gulp.task('html', ['javascript', 'stylesheets', 'stl'], function () {
   return gulp.src('app/*.html')
     .pipe($.useref({}))
     .pipe(gulp.dest('dist'))
 });
 
-gulp.task('serve', ['html'], () => {
+gulp.task('serve', ['html'], function () {
   sync({
     notify: false,
     port: port,
