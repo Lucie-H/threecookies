@@ -30,7 +30,6 @@ gulp.task('javascript', function () {
       }).bundle(function(err, res) {
         if (err) return next(err);
         file.contents = res;
-        console.log('test2')
         next(null, file);
       });
     }))
@@ -38,34 +37,8 @@ gulp.task('javascript', function () {
       console.log(error.stack);
       this.emit('end');
     })
-    .on('data', function(data) {
-      console.log('test')
-      console.log(data.contents.toString())
-    })
     .pipe(gulp.dest('dist/js/'))
 });
-/*
-gulp.task('javascript', function () {
-  return gulp.src('app/js/main.js')
-    .pipe(through2.obj(function(file, enc, next) { // workaround for https://github.com/babel/babelify/issues/46
-      const that = this;
-      browserify({
-        entries: file.path,
-        extensions: ['.js', '.jsx'],
-        debug: true,
-        transform:
-          babelify
-      }).bundle(function(err, res) {
-        if (err) return next(err);
-        file.contents = res;
-        that.push(file)
-        next(null, file)
-      });
-    }))
-    //.on('error', gutil.log)
-    .pipe(gulp.dest('dist/js/'))
-});
-*/
 gulp.task('stylesheets', function ()  {
   return gulp.src('app/stylesheets/**/*.scss')
     .pipe($.sass())
