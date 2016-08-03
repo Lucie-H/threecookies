@@ -45,16 +45,19 @@ const wrapper = () => {
    //helper = new THREE.CameraHelper(light.shadow.camera);
    //scene.add(helper);
 
-   let plane = new THREE.Mesh(
-     new THREE.PlaneBufferGeometry( 10000, 10000 ),
-     new THREE.MeshPhongMaterial( { color: 0x999999, specular: 0x101010 } )
-   );
-   plane.rotation.x = -Math.PI/2;
-   plane.position.y = -300;
+   initPlane () {
+     const plane = new THREE.Mesh(
+       new THREE.PlaneBufferGeometry( 10000, 10000 ),
+       new THREE.MeshPhongMaterial( { color: 0x999999, specular: 0x101010 } )
+     );
+     plane.rotation.x = -Math.PI/2;
+     plane.position.y = -300;
+     plane.receiveShadow = true;
+     return plane
+   }
+   const plane = initPlane();
    scene.add( plane );
-   plane.receiveShadow = true;
    scene.add( new THREE.HemisphereLight( 0xfefefe, 0x111122, 0.4 ) );
-
    renderer = new THREE.WebGLRenderer( { antialias: true } );
    renderer.setPixelRatio( window.devicePixelRatio );
    renderer.setSize( window.innerWidth, window.innerHeight );
@@ -63,6 +66,7 @@ const wrapper = () => {
 
    controls = new THREE.OrbitControls( camera, renderer.domElement );
    document.body.appendChild( renderer.domElement );
+
    renderer.domElement.addEventListener('mousedown', stopRotation);
    renderer.domElement.addEventListener('mouseup', startRotation);
    renderer.domElement.addEventListener('keypress', night);
@@ -212,7 +216,7 @@ const wrapper = () => {
           meshAirship.scale.set(3,3,3);
           meshAirship.receiveShadow = true;
           meshAirship.castShadow = true;
-          meshAirship.position.y = 100;
+          meshAirship.position.y = 2000;
           // mesh.rotation.set(0, - Math.PI / 2, 0);
           //scene.remove(meshRuby);
 
@@ -280,9 +284,9 @@ const wrapper = () => {
      meshRuby.receiveShadow = true;
      meshRuby.castShadow = true;
      // mesh.rotation.set(0, - Math.PI / 2, 0);
-     octree.add( meshRuby );
+     //octree.add( meshRuby );
      scene.add( meshRuby );
-     objects.push( meshRuby );
+     //objects.push( meshRuby );
 
    });
  }
