@@ -3,28 +3,32 @@
   transform: scaleX(2);
 }
 
-.jsButton {
-  background-color: #efefef;
-  color: #999999;
-  text-align: center;
-  right: 0%;
-  padding: 15px 32px;
-  position: absolute;
-  font-size: 16px;
-  border: none;
-  outline-style: none;
-
-}
 
 .rubyButton {
-  background-color: #efefef;
-  color: #999999;
+  left: 59%;
+}
+
+.airshipButton {
+  left: 32%;
+}
+
+.downloadButton {
+  left: 42%;
+  //bottom: 3em;
+}
+
+
+.button {
+  cursor: pointer;
+  background-color: transparent;
+  color: #ac1401;
+  margin-top: 700px;
   text-align: center;
   padding: 15px 32px;
   position: absolute;
-  right: 0%;
   font-size: 16px;
+  font-family: BlinkMacSystemFont;
   border: none;
-  margin-top: 55px;
   outline-style: none;
+  text-decoration: none;
 }

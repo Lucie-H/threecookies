@@ -1,7 +1,6 @@
 import React from 'react';
 import Camera from './camera.jsx';
 import Plane from './plane.jsx';
-// import createFragment from 'react-addons-create-fragment';
 
 class Viewer extends React.Component {
 
@@ -51,7 +50,6 @@ class Viewer extends React.Component {
 
 
   night() {
-    console.log('is clicked');
     const light = new THREE.DirectionalLight( 0x999999, 0.8 );
     light.position.set(250, 450, 200);
     light.target.position.set(0, 0, 0);

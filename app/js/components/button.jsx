@@ -6,6 +6,8 @@ class AllButtons extends React.Component {
 
     this.onClickHandlerButtonAirship = this.onClickHandlerButtonAirship.bind(this);
     this.onClickHandlerButtonRuby = this.onClickHandlerButtonRuby.bind(this);
+    //this.onClickHanderDownload = this.onClickHanderDownload.bind(this);
+    //this.pathRub = "../stl/ruby.stl";
   }
 
   onClickHandlerButtonAirship() {
@@ -14,20 +16,34 @@ class AllButtons extends React.Component {
   onClickHandlerButtonRuby() {
     this.props.showRuby();
   }
+  /*onClickHanderDownload() {
+    this.props.downloadModel();
+  }*/
 
   render() {
     return (
       <div id="addButton">
-        <button
-          onClick={this.onClickHandlerButtonAirship}
-          id="airshipButton"
-          className="jsButton"
-        >Airship</button>
-        <button
-          onClick={this.onClickHandlerButtonRuby}
-          id="rubyButton"
-          className="rubyButton"
-        >Ruby</button>
+        <div id="airship">
+          <button
+            onClick={this.onClickHandlerButtonAirship}
+            id="airshipButton"
+            className="airshipButton button"
+          >Airship</button>
+        </div>
+        <div id="ruby">
+          <button
+            onClick={this.onClickHandlerButtonRuby}
+            id="rubyButton"
+            className="rubyButton button"
+          >Ruby</button>
+        </div>
+        <div id="download">
+          <a
+            href={this.props.path}
+            className="downloadButton button"
+            download={this.props.fileName}
+          >Download Cookie Cutter</a>
+        </div>
       </div>
     );
   }
