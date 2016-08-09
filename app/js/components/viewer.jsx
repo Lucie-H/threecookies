@@ -1,4 +1,5 @@
 import React from 'react';
+import TWEEN from 'tween.js';
 import Camera from './camera.jsx';
 import Plane from './plane.jsx';
 
@@ -13,13 +14,18 @@ class Viewer extends React.Component {
     this.scene = this.createScene();
     this.renderer = this.createRenderer();
     this.camera = Camera(window);
-
+    this.particles = this.particles.bind(this);
+    this.initParticle = this.initParticle.bind(this);
     this.frame = 0;
+    this.req;
+    this.canvas = document.createElement( 'canvas' );
   }
 
   createScene() {
     const scene = new THREE.Scene();
-    scene.add( Plane() );
+    if(this.props.model === 'ruby') {
+      scene.add( Plane() );
+    }
     scene.add( new THREE.HemisphereLight( 0xfefefe, 0x111122, 0.4 ) );
     scene.fog = new THREE.Fog( 0xefefef, 1, 3500);
     scene.add( this.night() );
@@ -31,7 +37,12 @@ class Viewer extends React.Component {
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.shadowMap.enabled = true;
-    renderer.setClearColor( 0xefefef );
+    renderer.setClearColor( 0x000000 );
+
+    if(this.props.model == 'ruby') {
+      renderer.setClearColor( 0xefefef );
+    }
+
     return renderer;
   }
 
@@ -47,6 +58,72 @@ class Viewer extends React.Component {
       this.mesh = mesh;
     });
   }
+
+  particles() {
+    const material = new THREE.SpriteMaterial({
+      map: new THREE.CanvasTexture( this.generateSprite() ),
+      blending: THREE.AdditiveBlending
+    });
+    var particle1 = new THREE.Sprite(material);
+    var particle2 = new THREE.Sprite(material);
+    var particle3 = new THREE.Sprite(material);
+    var y1 = 80,
+        y2 = -10,
+        y3 = 170,
+        x1= -250,
+        x2 = -200,
+        x3= -200;
+    this.initParticle(particle1, y1, x1, 100);
+    this.initParticle(particle2, y2, x2, 100);
+    this.initParticle(particle3, y3, x3, 100);
+    this.scene.add(particle1);
+    this.scene.add(particle2);
+    this.scene.add(particle3);
+
+  }
+
+  generateSprite() {
+
+	  this.canvas.width = 16;
+	  this.canvas.height = 16;
+
+		var context = this.canvas.getContext( '2d' );
+		var gradient = context.createRadialGradient( this.canvas.width / 2, this.canvas.height / 2, 0, this.canvas.width / 2, this.canvas.height / 2, this.canvas.width / 2 );
+		gradient.addColorStop( 0, 'rgba(255,255,255,1)' );
+		gradient.addColorStop( 0.2, 'rgba(0,255,255,1)' );
+		gradient.addColorStop( 0.4, 'rgba(0,0,64,1)' );
+		gradient.addColorStop( 1, 'rgba(0,0,0,1)' );
+
+		context.fillStyle = gradient;
+		context.fillRect( 0, 0, this.canvas.width, this.canvas.height );
+
+		return this.canvas;
+
+	}
+
+
+
+  initParticle(particle, y, x, delay) {
+		particle.position.set( x, 80, 0 );
+    particle.position.y = y + (20 * Math.sin(this.frame/11));
+		particle.scale.x = particle.scale.y = Math.random() * 32 + 16;
+
+		new TWEEN.Tween( particle )
+			.delay( delay )
+			.to( {}, 10000 )
+			.start();
+
+		new TWEEN.Tween( particle.position )
+			.delay( delay )
+			.to( { x: Math.random() * 1000 - 4000, y: Math.random() * 1000 - 500, z: Math.random() * 12000 - 6000 }, 60000 )
+			.start();
+
+		new TWEEN.Tween( particle.scale )
+			.delay( delay )
+			.to( { x: 0.01, y: 0.01 }, 10000 )
+			.start();
+	}
+
 
 
   night() {
@@ -73,12 +150,18 @@ class Viewer extends React.Component {
   }
 
   renderScene() {
-    requestAnimationFrame(this.renderScene);
+
+    this.req = requestAnimationFrame(this.renderScene);
+
+    if(this.props.model === 'airship') {
+      TWEEN.update();
+      this.particles();
+    }
+
     if (this.mesh) {
       this.props.animation(this.mesh, this.frame);
       this.frame += 1;
     }
-
     this.renderer.render( this.scene, this.camera );
   }
 
@@ -104,10 +187,16 @@ class Viewer extends React.Component {
 
   componenWillUnmount() {
     // clean up WebGL context and requestAnimationFrame callbacks
+    console.log('unmount')
+    window.cancelAnimationFrame(this.req);
+    window.removeEventListener('resize', this.onWindowResize);
   }
 
   render() {
-    return (<div id='view'></div>);
+    return (
+      <div id='view'>
+      </div>
+    );
   }
 }
 

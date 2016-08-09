@@ -21,7 +21,6 @@
 .button {
   cursor: pointer;
   background-color: transparent;
-  color: #ac1401;
   margin-top: 700px;
   text-align: center;
   padding: 15px 32px;
@@ -31,4 +30,11 @@
   border: none;
   outline-style: none;
   text-decoration: none;
+}
+
+.rubyColor {
+  color: #ac1401;
+}
+.airshipColor {
+  color: #2E9AFE;
 }

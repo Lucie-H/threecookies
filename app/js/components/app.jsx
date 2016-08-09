@@ -3,15 +3,15 @@ import AllButtons from './button.jsx';
 import Viewer from './viewer.jsx';
 
 const jump = (mesh, frame) => {
-  mesh.position.y = 200 + (20 * Math.sin(frame/10));
+  mesh.position.y = 200 + (20 * Math.sin(frame/11));
 };
 
 const rotate = (mesh, frame) => {
   mesh.rotation.y -= 0.03;
 };
 
-const AIRSHIP = { model: 'airship', meshColor: '0xffffff', animation: jump, path: '../stl/airship.stl', fileName: 'airship.stl' };
-const RUBY = { model: 'ruby', meshColor: '0xac1401', animation: rotate, path: "../stl/ruby.stl", fileName: 'ruby.stl'};
+const AIRSHIP = { model: 'airship', meshColor: '0xffffff', animation: jump, path: '../stl/airship.stl', fileName: 'airship.stl', classN: 'button airshipColor' };
+const RUBY = { model: 'ruby', meshColor: '0xac1401', animation: rotate, path: "../stl/ruby.stl", fileName: 'ruby.stl', classN: 'button rubyColor'};
 
 class App extends React.Component {
   constructor(props) {
@@ -34,8 +34,8 @@ class App extends React.Component {
   render() {
     return (
       <div>
-        <AllButtons showShip={this.showShip} showRuby={this.showRuby} path={this.state.path} fileName={this.state.fileName} />
-        <Viewer model={this.state.model} meshColor={this.state.meshColor} key={this.state.model} animation={this.state.animation} />
+        <AllButtons showShip={this.showShip} showRuby={this.showRuby} path={this.state.path} fileName={this.state.fileName} classN={this.state.classN} />
+        <Viewer model={this.state.model} meshColor={this.state.meshColor} key={this.state.model} animation={this.state.animation} classN={this.state.classN} />
       </div>
     )
   }
