@@ -27,7 +27,7 @@ class App extends React.Component {
     this.setState(AIRSHIP);
   }
 
-  showRuby( geometry ) {
+  showRuby() {
     this.setState(RUBY);
   }
 

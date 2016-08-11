@@ -2,23 +2,32 @@ import React from 'react';
 import TWEEN from 'tween.js';
 import Camera from './camera.jsx';
 import Plane from './plane.jsx';
+import Particle from '/Users/Pia/threecookies/threecookies/app/js/particle.js';
+
+let renderer;
 
 class Viewer extends React.Component {
 
   constructor(props) {
     super(props);
 
+    this.canvas = document.createElement( 'canvas' );
+
     this.renderScene = this.renderScene.bind(this);
     this.resize = this.resize.bind(this);
+    this.mountRendererElement = this.mountRendererElement.bind(this);
+  //  this.particles = this.particles.bind(this);
 
+    this.loader = new THREE.STLLoader();
     this.scene = this.createScene();
     this.renderer = this.createRenderer();
     this.camera = Camera(window);
-    this.particles = this.particles.bind(this);
-    this.initParticle = this.initParticle.bind(this);
-    this.frame = 0;
+    this.particle = Particle(this.canvas, this.scene);
     this.req;
-    this.canvas = document.createElement( 'canvas' );
+    this.frame = 0;
+    this.itemsToRemove = [];
+    this.itemsToRemove.push(this.scene);
+
   }
 
   createScene() {
@@ -28,12 +37,15 @@ class Viewer extends React.Component {
     }
     scene.add( new THREE.HemisphereLight( 0xfefefe, 0x111122, 0.4 ) );
     scene.fog = new THREE.Fog( 0xefefef, 1, 3500);
-    scene.add( this.night() );
+    scene.add( this.light() );
     return scene;
   }
 
   createRenderer() {
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    if (typeof renderer === 'undefined') {
+      renderer = new THREE.WebGLRenderer({ antialias: true });
+    }
+
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.shadowMap.enabled = true;
@@ -47,8 +59,7 @@ class Viewer extends React.Component {
   }
 
   loadModel() {
-    const loader = new THREE.STLLoader();
-    loader.load(`../stl/${this.props.model}.stl`, (geometry) => {
+    this.loader.load(`../stl/${this.props.model}.stl`, (geometry) => {
       const material = new THREE.MeshPhongMaterial({ color: parseInt(`${this.props.meshColor}`, 16), specular: 0xffffff, shininess: 200 });
       const mesh = new THREE.Mesh( geometry, material );
       mesh.scale.set(3,3,3);
@@ -79,11 +90,9 @@ class Viewer extends React.Component {
     this.scene.add(particle1);
     this.scene.add(particle2);
     this.scene.add(particle3);
-
   }
 
   generateSprite() {
-
 	  this.canvas.width = 16;
 	  this.canvas.height = 16;
 
@@ -102,21 +111,18 @@ class Viewer extends React.Component {
 	}
 
 
-
   initParticle(particle, y, x, delay) {
 		particle.position.set( x, 80, 0 );
     particle.position.y = y + (20 * Math.sin(this.frame/11));
 		particle.scale.x = particle.scale.y = Math.random() * 32 + 16;
 
-		new TWEEN.Tween( particle )
-			.delay( delay )
-			.to( {}, 10000 )
-			.start();
-
 		new TWEEN.Tween( particle.position )
 			.delay( delay )
-			.to( { x: Math.random() * 1000 - 4000, y: Math.random() * 1000 - 500, z: Math.random() * 12000 - 6000 }, 60000 )
-			.start();
+			.to( { x: Math.random() * 150 - 700, y: particle.position.y + Math.random() * 150 - 100, z: Math.random() * 1000 - 500 }, 10000 )
+			.start()
+      .onComplete(() => {
+        this.scene.remove(particle);
+      });
 
 		new TWEEN.Tween( particle.scale )
 			.delay( delay )
@@ -125,13 +131,11 @@ class Viewer extends React.Component {
 	}
 
 
-
-  night() {
+  light() {
     const light = new THREE.DirectionalLight( 0x999999, 0.8 );
     light.position.set(250, 450, 200);
     light.target.position.set(0, 0, 0);
     light.castShadow = true;
-
     light.shadow.camera.near = 10;
     light.shadow.camera.far = 1500;
     light.shadow.camera.left = -200;
@@ -142,27 +146,32 @@ class Viewer extends React.Component {
     return light;
   }
 
-
   resize() {
    this.renderer.setSize(window.innerWidth, window.innerHeight);
    this.camera.aspect = window.innerWidth / window.innerHeight;
    this.camera.updateProjectionMatrix();
   }
 
-  renderScene() {
+  // renderLoop() {
+  //   this.req = requestAnimationFrame(this.renderLoop);
+  //   this.renderScene();
+  // }
 
+  renderScene() {
     this.req = requestAnimationFrame(this.renderScene);
 
     if(this.props.model === 'airship') {
       TWEEN.update();
       this.particles();
-    }
+      //Particle(this.canvas, this.scene);
 
+    }
     if (this.mesh) {
       this.props.animation(this.mesh, this.frame);
       this.frame += 1;
     }
     this.renderer.render( this.scene, this.camera );
+
   }
 
   renderControl() {
@@ -173,23 +182,25 @@ class Viewer extends React.Component {
     controls.maxDistance = 3000;
     controls.minPolarAngle = 0; // radians
     controls.maxPolarAngle = 1.65; // radians
-
     return controls;
+  }
+
+  mountRendererElement() {
+    document.getElementById('view').appendChild(this.renderer.domElement);
+    window.addEventListener('resize', this.resize);
   }
 
   componentDidMount() {
     this.loadModel();
     this.renderControl();
     this.renderScene();
-    document.getElementById('view').appendChild(this.renderer.domElement);
-    window.addEventListener('resize', this.resize);
+    this.mountRendererElement();
   }
 
-  componenWillUnmount() {
-    // clean up WebGL context and requestAnimationFrame callbacks
-    console.log('unmount')
+  componentWillUnmount() {
     window.cancelAnimationFrame(this.req);
-    window.removeEventListener('resize', this.onWindowResize);
+    window.removeEventListener('resize', this.resize);
+    this.scene.remove(this.mesh);
   }
 
   render() {
