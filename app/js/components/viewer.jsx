@@ -2,7 +2,8 @@ import React from 'react';
 import TWEEN from 'tween.js';
 import Camera from './camera.jsx';
 import Plane from './plane.jsx';
-import Particle from '/Users/Pia/threecookies/threecookies/app/js/particle.js';
+import Particle from '../particle.js';
+import {saveAs} from 'file-saver';
 
 let renderer;
 
@@ -16,23 +17,20 @@ class Viewer extends React.Component {
     this.renderScene = this.renderScene.bind(this);
     this.resize = this.resize.bind(this);
     this.mountRendererElement = this.mountRendererElement.bind(this);
+    this.onGeometryLoaded = this.onGeometryLoaded.bind(this);
   //  this.particles = this.particles.bind(this);
 
     this.loader = new THREE.STLLoader();
     this.scene = this.createScene();
     this.renderer = this.createRenderer();
     this.camera = Camera(window);
-    this.particle = Particle(this.canvas, this.scene);
     this.req;
     this.frame = 0;
-    this.itemsToRemove = [];
-    this.itemsToRemove.push(this.scene);
-
   }
 
   createScene() {
     const scene = new THREE.Scene();
-    if(this.props.model === 'ruby') {
+    if(this.props.model !== 'airship') {
       scene.add( Plane() );
     }
     scene.add( new THREE.HemisphereLight( 0xfefefe, 0x111122, 0.4 ) );
@@ -51,84 +49,35 @@ class Viewer extends React.Component {
     renderer.shadowMap.enabled = true;
     renderer.setClearColor( 0x000000 );
 
-    if(this.props.model == 'ruby') {
+    if(this.props.model !== 'airship') {
       renderer.setClearColor( 0xefefef );
     }
 
     return renderer;
   }
 
+  onGeometryLoaded(geometry) {
+    const material = new THREE.MeshPhongMaterial({ color: parseInt(`${this.props.meshColor}`, 16), specular: 0xffffff, shininess: 200 });
+    const mesh = new THREE.Mesh( geometry, material );
+    mesh.scale.set(3,3,3);
+    mesh.receiveShadow = true;
+    mesh.castShadow = true;
+    this.scene.add(mesh);
+    this.mesh = mesh;
+  }
+
   loadModel() {
-    this.loader.load(`../stl/${this.props.model}.stl`, (geometry) => {
-      const material = new THREE.MeshPhongMaterial({ color: parseInt(`${this.props.meshColor}`, 16), specular: 0xffffff, shininess: 200 });
-      const mesh = new THREE.Mesh( geometry, material );
-      mesh.scale.set(3,3,3);
-      mesh.receiveShadow = true;
-      mesh.castShadow = true;
-      this.scene.add(mesh);
-      this.mesh = mesh;
-    });
-  }
-
-  particles() {
-    const material = new THREE.SpriteMaterial({
-      map: new THREE.CanvasTexture( this.generateSprite() ),
-      blending: THREE.AdditiveBlending
-    });
-    var particle1 = new THREE.Sprite(material);
-    var particle2 = new THREE.Sprite(material);
-    var particle3 = new THREE.Sprite(material);
-    var y1 = 80,
-        y2 = -10,
-        y3 = 170,
-        x1= -250,
-        x2 = -200,
-        x3= -200;
-    this.initParticle(particle1, y1, x1, 100);
-    this.initParticle(particle2, y2, x2, 100);
-    this.initParticle(particle3, y3, x3, 100);
-    this.scene.add(particle1);
-    this.scene.add(particle2);
-    this.scene.add(particle3);
-  }
-
-  generateSprite() {
-	  this.canvas.width = 16;
-	  this.canvas.height = 16;
-
-		var context = this.canvas.getContext( '2d' );
-		var gradient = context.createRadialGradient( this.canvas.width / 2, this.canvas.height / 2, 0, this.canvas.width / 2, this.canvas.height / 2, this.canvas.width / 2 );
-		gradient.addColorStop( 0, 'rgba(255,255,255,1)' );
-		gradient.addColorStop( 0.2, 'rgba(0,255,255,1)' );
-		gradient.addColorStop( 0.4, 'rgba(0,0,64,1)' );
-		gradient.addColorStop( 1, 'rgba(0,0,0,1)' );
-
-		context.fillStyle = gradient;
-		context.fillRect( 0, 0, this.canvas.width, this.canvas.height );
-
-		return this.canvas;
-
-	}
-
-
-  initParticle(particle, y, x, delay) {
-		particle.position.set( x, 80, 0 );
-    particle.position.y = y + (20 * Math.sin(this.frame/11));
-		particle.scale.x = particle.scale.y = Math.random() * 32 + 16;
-
-		new TWEEN.Tween( particle.position )
-			.delay( delay )
-			.to( { x: Math.random() * 150 - 700, y: particle.position.y + Math.random() * 150 - 100, z: Math.random() * 1000 - 500 }, 10000 )
-			.start()
-      .onComplete(() => {
-        this.scene.remove(particle);
-      });
-
-		new TWEEN.Tween( particle.scale )
-			.delay( delay )
-			.to( { x: 0.01, y: 0.01 }, 10000 )
-			.start();
-	}
+    if(this.props.model != 'startScreen' && this.props.model != 'newMesh') {
+      this.loader.load(`/stl/${this.props.fileName}`, this.onGeometryLoaded);
+    } else if(this.props.model === 'newMesh') {
+        const stlAsBlob = this.props.newMesh.savedFile[0];
+        const reader = new FileReader();
+        reader.addEventListener('load', (event) => {
+          this.onGeometryLoaded(this.loader.parse(event.target.result));
+        });
+        reader.readAsText(stlAsBlob);
+      }
+    }
 
 
   light() {
@@ -162,11 +111,11 @@ class Viewer extends React.Component {
 
     if(this.props.model === 'airship') {
       TWEEN.update();
-      this.particles();
-      //Particle(this.canvas, this.scene);
+    //  this.particles();
+      Particle(this.canvas, this.scene, this.frame, TWEEN, THREE);
 
     }
-    if (this.mesh) {
+    if(this.mesh && this.props.model != 'startScreen') {
       this.props.animation(this.mesh, this.frame);
       this.frame += 1;
     }
