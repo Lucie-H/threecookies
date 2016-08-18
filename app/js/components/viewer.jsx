@@ -3,9 +3,9 @@ import TWEEN from 'tween.js';
 import Camera from './camera.jsx';
 import Plane from './plane.jsx';
 import Particle from '../particle.js';
-import {saveAs} from 'file-saver';
 
 let renderer;
+let svgRenderer;
 
 class Viewer extends React.Component {
 
@@ -18,11 +18,11 @@ class Viewer extends React.Component {
     this.resize = this.resize.bind(this);
     this.mountRendererElement = this.mountRendererElement.bind(this);
     this.onGeometryLoaded = this.onGeometryLoaded.bind(this);
-  //  this.particles = this.particles.bind(this);
 
-    this.loader = new THREE.STLLoader();
     this.scene = this.createScene();
     this.renderer = this.createRenderer();
+    this.svgRenderer = this.createSVGRenderer();
+    this.xmls = new XMLSerializer();
     this.camera = Camera(window);
     this.req;
     this.frame = 0;
@@ -30,13 +30,22 @@ class Viewer extends React.Component {
 
   createScene() {
     const scene = new THREE.Scene();
-    if(this.props.model !== 'airship') {
-      scene.add( Plane() );
-    }
+    scene.add( Plane() );
     scene.add( new THREE.HemisphereLight( 0xfefefe, 0x111122, 0.4 ) );
     scene.fog = new THREE.Fog( 0xefefef, 1, 3500);
     scene.add( this.light() );
     return scene;
+  }
+
+  createSVGRenderer() {
+    if (typeof svgRenderer === 'undefined') {
+      svgRenderer = new THREE.SVGRenderer({ antialias: true });
+    }
+    svgRenderer.setPixelRatio( window.devicePixelRatio );
+    svgRenderer.setSize( window.innerWidth, window.innerHeight );
+    svgRenderer.setClearColor( 0x000000 );
+
+    return svgRenderer;
   }
 
   createRenderer() {
@@ -47,38 +56,20 @@ class Viewer extends React.Component {
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.shadowMap.enabled = true;
-    renderer.setClearColor( 0x000000 );
-
-    if(this.props.model !== 'airship') {
-      renderer.setClearColor( 0xefefef );
-    }
+    renderer.setClearColor( 0xefefef );
 
     return renderer;
   }
 
-  onGeometryLoaded(geometry) {
+  onGeometryLoaded() {
     const material = new THREE.MeshPhongMaterial({ color: parseInt(`${this.props.meshColor}`, 16), specular: 0xffffff, shininess: 200 });
-    const mesh = new THREE.Mesh( geometry, material );
+    const mesh = new THREE.Mesh( this.props.geometry, material );
     mesh.scale.set(3,3,3);
     mesh.receiveShadow = true;
     mesh.castShadow = true;
     this.scene.add(mesh);
     this.mesh = mesh;
   }
-
-  loadModel() {
-    if(this.props.model != 'startScreen' && this.props.model != 'newMesh') {
-      this.loader.load(`/stl/${this.props.fileName}`, this.onGeometryLoaded);
-    } else if(this.props.model === 'newMesh') {
-        const stlAsBlob = this.props.newMesh.savedFile[0];
-        const reader = new FileReader();
-        reader.addEventListener('load', (event) => {
-          this.onGeometryLoaded(this.loader.parse(event.target.result));
-        });
-        reader.readAsText(stlAsBlob);
-      }
-    }
-
 
   light() {
     const light = new THREE.DirectionalLight( 0x999999, 0.8 );
@@ -109,18 +100,15 @@ class Viewer extends React.Component {
   renderScene() {
     this.req = requestAnimationFrame(this.renderScene);
 
-    if(this.props.model === 'airship') {
+    if(this.props.selected === 'airship') {
       TWEEN.update();
-    //  this.particles();
       Particle(this.canvas, this.scene, this.frame, TWEEN, THREE);
-
     }
-    if(this.mesh && this.props.model != 'startScreen') {
+    if (this.mesh && this.props.selected != 'startScreen') {
       this.props.animation(this.mesh, this.frame);
       this.frame += 1;
     }
     this.renderer.render( this.scene, this.camera );
-
   }
 
   renderControl() {
@@ -136,14 +124,17 @@ class Viewer extends React.Component {
 
   mountRendererElement() {
     document.getElementById('view').appendChild(this.renderer.domElement);
+    this.svgRenderer.render( this.scene, this.camera );
     window.addEventListener('resize', this.resize);
   }
 
   componentDidMount() {
-    this.loadModel();
+    if (this.props.geometry) {
+      this.onGeometryLoaded();
+    }
+    this.mountRendererElement();
     this.renderControl();
     this.renderScene();
-    this.mountRendererElement();
   }
 
   componentWillUnmount() {

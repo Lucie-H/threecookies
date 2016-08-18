@@ -12,54 +12,66 @@ const rotate = (mesh, frame) => {
   mesh.rotation.y -= 0.03;
 };
 
-const STARTSCREEN = {  model: 'startScreen', classN: 'rubyColor'};
-const AIRSHIP = { model: 'airship', meshColor: '0xffffff', animation: jump, path: '../stl/airship.stl', fileName: 'airship.stl', classN: 'airshipColor' };
-const RUBY = { model: 'ruby', meshColor: '0xac1401', animation: rotate, path: "../stl/ruby.stl", fileName: 'ruby.stl', classN: 'rubyColor'};
-const JAVAS = {model: 'js', meshColor: '0xac1401', animation: rotate, path: "../stl/js.stl", fileName: 'js.stl', classN: 'rubyColor'};
-
-const newMesh = {model: 'newMesh', savedFile: [], fileName: 'ruby.stl', meshColor: '0xac1401', animation: rotate, classN: 'rubyColor'};
-
+const AIRSHIP = { name: 'airship', key:'airship', geometry: null, meshColor: '0xffffff', animation: jump, path: '../stl/airship.stl', fileName: 'airship.stl', classN: 'airshipColor' };
+const RUBY = { name: 'ruby', key:'ruby', geometry: null, meshColor: '0xac1401', animation: rotate, path: "../stl/ruby.stl", fileName: 'ruby.stl', classN: 'rubyColor'};
+const JS = {name: 'javascript', key:'javas', geometry: null, meshColor: '0xac1401', animation: rotate, path: "../stl/js.stl", fileName: 'js.stl', classN: 'rubyColor'};
 
 class App extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = Object.assign({}, STARTSCREEN);
+    this.state = {
+      models: {},
+      selected: null
+    };
+    this.loader = new THREE.STLLoader();
 
-    this.showShip = this.showShip.bind(this);
-    this.showRuby = this.showRuby.bind(this);
-    this.showJS = this.showJS.bind(this);
+    this.onSelect = this.onSelect.bind(this);
     this.onDrop = this.onDrop.bind(this);
+    this.loadModel = this.loadModel.bind(this);
   }
 
-  showShip() {
-    this.setState(AIRSHIP);
+  onSelect(name) {
+    this.setState({selected: name});
   }
 
-  showRuby() {
-    this.setState(RUBY);
+  onDrop(files) {
+    const file = files[0];
+    this.loadModel({file, meshColor: '0xac1401', animation: rotate});
   }
 
-  showJS() {
-    this.setState(JAVAS);
-  }
-
-  onDrop(file) {
-    newMesh.savedFile = file;
-    this.setState(newMesh);
+  loadModel(obj) {
+    if(typeof obj.file !== 'undefined') {
+      const reader = new FileReader();
+      reader.addEventListener('load', (event) => {
+        const geometry = this.loader.parse(event.target.result);
+        const model = Object.assign({}, obj, {geometry});
+        const name = `${obj.file.name}-${obj.file.lastModified}`;
+        this.setState({selected: name, models: Object.assign({}, this.state.models, {[name]: model})});
+      });
+      reader.readAsBinaryString(obj.file);
+    } else {
+      this.loader.load(obj.path, (geometry) => {
+        const model = Object.assign({}, obj, {geometry});
+        this.setState({models: Object.assign({}, this.state.models, {[obj.name]: model})});
+      });
     }
+  }
 
-
-  /*
-  <AllButtons showShip={this.showShip} showRuby={this.showRuby} showJS={this.showJS} path={this.state.path} fileName={this.state.fileName} classN={this.state.classN} />
-  */
+  componentDidMount() {
+    const arr = [AIRSHIP, RUBY, JS];
+    arr.forEach((model) => {
+      this.loadModel(model);
+    });
+  }
 
   render() {
+    const model = this.state.models[this.state.selected] || {};
     return (
       <div>
         <Dropzone className="dropzoneClass" multiple={false} onDrop={this.onDrop} disableClick>
-          <SelectModule showShip={this.showShip} showRuby={this.showRuby} showJS={this.showJS} classN={this.state.classN} />
-          <Viewer newMesh={newMesh} model={this.state.model} meshColor={this.state.meshColor} key={this.state.model} fileName={this.state.fileName} animation={this.state.animation} classN={this.state.classN} />
+          <SelectModule items={this.state.models} selected={this.state.selected} onSelect={this.onSelect} />
+          <Viewer geometry={model.geometry} selected={this.state.selected} animation={model.animation} meshColor={model.meshColor} key={this.state.selected} fileName={model.fileName} classN={model.classN} />
         </Dropzone>
       </div>
     )
