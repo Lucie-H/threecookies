@@ -30,7 +30,8 @@ class Viewer extends React.Component {
 
   createScene() {
     const scene = new THREE.Scene();
-    scene.add( Plane() );
+    if(this.props.selected !== 'airship') scene.add( Plane() );
+
     scene.add( new THREE.HemisphereLight( 0xfefefe, 0x111122, 0.4 ) );
     scene.fog = new THREE.Fog( 0xefefef, 1, 3500);
     scene.add( this.light() );
@@ -56,8 +57,11 @@ class Viewer extends React.Component {
     renderer.setPixelRatio( window.devicePixelRatio );
     renderer.setSize( window.innerWidth, window.innerHeight );
     renderer.shadowMap.enabled = true;
-    renderer.setClearColor( 0xefefef );
+    renderer.setClearColor( 0x000000 );
 
+    if(this.props.selected !== 'airship') {
+      renderer.setClearColor( 0xefefef );
+    }
     return renderer;
   }
 
@@ -92,19 +96,16 @@ class Viewer extends React.Component {
    this.camera.updateProjectionMatrix();
   }
 
-  // renderLoop() {
-  //   this.req = requestAnimationFrame(this.renderLoop);
-  //   this.renderScene();
-  // }
-
   renderScene() {
     this.req = requestAnimationFrame(this.renderScene);
 
     if(this.props.selected === 'airship') {
       TWEEN.update();
+
       Particle(this.canvas, this.scene, this.frame, TWEEN, THREE);
+
     }
-    if (this.mesh && this.props.selected != 'startScreen') {
+    if(this.mesh) {
       this.props.animation(this.mesh, this.frame);
       this.frame += 1;
     }
@@ -129,9 +130,8 @@ class Viewer extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.geometry) {
-      this.onGeometryLoaded();
-    }
+
+    if(this.props.geometry) this.onGeometryLoaded();
     this.mountRendererElement();
     this.renderControl();
     this.renderScene();
