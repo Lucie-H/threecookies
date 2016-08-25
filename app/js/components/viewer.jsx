@@ -1,11 +1,10 @@
 import React from 'react';
 import TWEEN from 'tween.js';
-import Camera from './camera.jsx';
-import Plane from './plane.jsx';
-import Particle from '../particle.js';
+import Camera from './camera';
+import Plane from './plane';
+import Particle from '../particle';
 
 let renderer;
-let svgRenderer;
 
 class Viewer extends React.Component {
 
@@ -21,7 +20,6 @@ class Viewer extends React.Component {
 
     this.scene = this.createScene();
     this.renderer = this.createRenderer();
-    this.svgRenderer = this.createSVGRenderer();
     this.xmls = new XMLSerializer();
     this.camera = Camera(window);
     this.req;
@@ -36,17 +34,6 @@ class Viewer extends React.Component {
     scene.fog = new THREE.Fog( 0xefefef, 1, 3500);
     scene.add( this.light() );
     return scene;
-  }
-
-  createSVGRenderer() {
-    if (typeof svgRenderer === 'undefined') {
-      svgRenderer = new THREE.SVGRenderer({ antialias: true });
-    }
-    svgRenderer.setPixelRatio( window.devicePixelRatio );
-    svgRenderer.setSize( window.innerWidth, window.innerHeight );
-    svgRenderer.setClearColor( 0x000000 );
-
-    return svgRenderer;
   }
 
   createRenderer() {
@@ -125,12 +112,10 @@ class Viewer extends React.Component {
 
   mountRendererElement() {
     document.getElementById('view').appendChild(this.renderer.domElement);
-    this.svgRenderer.render( this.scene, this.camera );
     window.addEventListener('resize', this.resize);
   }
 
   componentDidMount() {
-
     if(this.props.geometry) this.onGeometryLoaded();
     this.mountRendererElement();
     this.renderControl();

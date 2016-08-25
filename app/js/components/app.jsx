@@ -1,8 +1,10 @@
 import React from 'react';
-import AllButtons from './button.jsx';
-import Viewer from './viewer.jsx';
-import SelectModule from './superSelect.jsx';
+import Viewer from './viewer';
+import Selector from './selector';
 import Dropzone from 'react-dropzone';
+import AllButtons from './button';
+
+let svgRenderer;
 
 const jump = (mesh, frame) => {
   mesh.position.y = 200 + (20 * Math.sin(frame/11));
@@ -29,6 +31,7 @@ class App extends React.Component {
     this.onSelect = this.onSelect.bind(this);
     this.onDrop = this.onDrop.bind(this);
     this.loadModel = this.loadModel.bind(this);
+    this.renderSVG = this.renderSVG.bind(this);
   }
 
   onSelect(name) {
@@ -58,6 +61,14 @@ class App extends React.Component {
     }
   }
 
+  renderSVG() {
+    const svgRenderer = new THREE.SVGRenderer({ antialias: true });
+    svgRenderer.setPixelRatio( window.devicePixelRatio );
+    svgRenderer.setSize( 100, 100 );
+    svgRenderer.setClearColor( 0xffffff );
+    return svgRenderer;
+  }
+
   componentDidMount() {
     const arr = [AIRSHIP, RUBY, JS];
     arr.forEach((model) => {
@@ -70,7 +81,8 @@ class App extends React.Component {
     return (
       <div>
         <Dropzone className="dropzoneClass" multiple={false} onDrop={this.onDrop} disableClick>
-          <SelectModule items={this.state.models} selected={this.state.selected} onSelect={this.onSelect} />
+          <AllButtons path={model.path} fileName={model.fileName} selected={this.state.selected}/>
+          <Selector svgRenderer={this.renderSVG()} items={this.state.models} selected={this.state.selected} onSelect={this.onSelect} />
           <Viewer geometry={model.geometry} selected={this.state.selected} animation={model.animation} meshColor={model.meshColor} key={this.state.selected} fileName={model.fileName} classN={model.classN} />
         </Dropzone>
       </div>

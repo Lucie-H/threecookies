@@ -18,7 +18,10 @@
   "homepage": "https://github.com/Lucie-H/threecookies#readme",
   "dependencies": {
     "classnames": "^2.2.5",
+    "csg": "^1.0.1",
     "file-saver": "^1.3.2",
+    "makerjs": "^0.9.12",
+    "openjscad-csg": "^1.0.3",
     "react": "^15.1.0",
     "react-dom": "^15.1.0",
     "react-dropzone": "^3.5.3",

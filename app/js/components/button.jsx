@@ -4,50 +4,39 @@ class AllButtons extends React.Component {
   constructor(props) {
     super(props);
 
-    this.onClickHandlerButtonAirship = this.onClickHandlerButtonAirship.bind(this);
-    this.onClickHandlerButtonRuby = this.onClickHandlerButtonRuby.bind(this);
+    this.downloadElement;
+    this.createLink = this.createLink.bind(this);
   }
 
-  onClickHandlerButtonAirship() {
-    this.props.showShip();
-  }
-  onClickHandlerButtonRuby() {
-    this.props.showRuby();
-  }
+  createLink() {
+    this.downloadElement = document.createElement('a');
+    this.downloadElement.href = this.props.path;
+    this.downloadElement.id = 'mimi';
+    this.downloadElement.className = 'downloadButton button rubyColor';
+    this.downloadElement.download = this.props.fileName;
+    this.downloadElement.innerHTML = 'Download Cookie Cutter';
 
+    if(this.props.selected && this.props.path !== 'undefined') {
+      document.getElementById('download').appendChild(this.downloadElement);
+
+    } else if(this.props.path === 'undefined') {
+      const bla = document.getElementById('download');
+      const bli = document.getElementById('mimi');
+      const tada = bla.removeChild(bli);
+    }
+  }
 
   render() {
+
+    this.createLink();
+
     return (
       <div id="addButton">
-        <div id="airship">
-          <button
-            onClick={this.onClickHandlerButtonAirship}
-            id="airshipButton"
-            className={"airshipButton " + this.props.classN}
-          >Airship</button>
-        </div>
-        <div id="ruby">
-          <button
-            onClick={this.onClickHandlerButtonRuby}
-            id="rubyButton"
-            className={"rubyButton " + this.props.classN}
-          >Ruby</button>
-        </div>
         <div id="download">
-          <a
-            href={this.props.path}
-            className={"downloadButton " + this.props.classN}
-            download={this.props.fileName}
-          >Download Cookie Cutter</a>
         </div>
       </div>
     );
   }
 }
-
-AllButtons.propTypes = {
-  showShip: React.PropTypes.func.isRequired,
-  showRuby: React.PropTypes.func.isRequired
-};
 
 export default AllButtons;
