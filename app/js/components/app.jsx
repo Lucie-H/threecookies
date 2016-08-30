@@ -1,8 +1,13 @@
 import React from 'react';
+import OpenJsCad from 'openjscad-csg';
+import MakerJs from 'makerjs';
+
 import Viewer from './viewer';
 import Selector from './selector';
 import Dropzone from 'react-dropzone';
 import AllButtons from './button';
+
+window.CSG = OpenJsCad.CSG;
 
 let svgRenderer;
 
@@ -32,6 +37,7 @@ class App extends React.Component {
     this.onDrop = this.onDrop.bind(this);
     this.loadModel = this.loadModel.bind(this);
     this.renderSVG = this.renderSVG.bind(this);
+    this.stlFromSvg;
   }
 
   onSelect(name) {
@@ -43,16 +49,48 @@ class App extends React.Component {
     this.loadModel({file, meshColor: '0xac1401', animation: rotate});
   }
 
+  geometryToState(dataToParse, obj) {
+    const geometry = this.loader.parse(dataToParse);
+    const model = Object.assign({}, obj, {geometry});
+    const name = `${obj.file.name}-${obj.file.lastModified}`;
+    this.setState({selected: name, models: Object.assign({}, this.state.models, {[name]: model})});
+  }
+
+  svgToStl() {
+    const data = event.target.result;
+    const parser = new DOMParser();
+    const svg = parser.parseFromString(data, 'image/svg+xml');
+
+    const paths = Array.prototype.slice.call(svg.getElementsByTagName('path'))
+    const svgPath = paths.map(function (path) {
+      const d = path.getAttribute('d');
+      return d.replace(/\s+/g, ' ');
+    }).join(' ');
+
+    const iModelObject = MakerJs.importer.fromSVGPathData(svgPath);
+
+    return MakerJs.exporter.toSTL(iModelObject, {extrusion: 10});
+  }
+
   loadModel(obj) {
     if(typeof obj.file !== 'undefined') {
-      const reader = new FileReader();
-      reader.addEventListener('load', (event) => {
-        const geometry = this.loader.parse(event.target.result);
-        const model = Object.assign({}, obj, {geometry});
-        const name = `${obj.file.name}-${obj.file.lastModified}`;
-        this.setState({selected: name, models: Object.assign({}, this.state.models, {[name]: model})});
-      });
-      reader.readAsBinaryString(obj.file);
+
+      if (/\.svg$/.test(obj.file.name)) {
+        const reader = new FileReader();
+        reader.addEventListener('load', (event) => {
+          const stlFromSvg = this.svgToStl();
+          this.geometryToState(stlFromSvg, obj);
+        });
+        reader.readAsText(obj.file);
+
+      } else {
+        const reader = new FileReader();
+        reader.addEventListener('load', (event) => {
+          this.geometryToState(event.target.result, obj);
+        });
+        reader.readAsBinaryString(obj.file);
+      }
+
     } else {
       this.loader.load(obj.path, (geometry) => {
         const model = Object.assign({}, obj, {geometry});
